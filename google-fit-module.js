@@ -21,7 +21,7 @@ const GoogleFitModule = (() => {
 
   // ─── CONFIG ────────────────────────────────────────────────────────────────
   const CFG = {
-    CLIENT_ID:    'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
+  CLIENT_ID: '1003456046183-ongduka50iv20f0pobt7gr6a61e0l60a.apps.googleusercontent.com',
     REDIRECT_URI: window.location.origin + window.location.pathname,
     SCOPES: [
       'https://www.googleapis.com/auth/fitness.sleep.read',
