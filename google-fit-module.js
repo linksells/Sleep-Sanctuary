@@ -21,7 +21,7 @@ const GoogleFitModule = (() => {
 
   // ─── CONFIG ────────────────────────────────────────────────────────────────
   const CFG = {
-  CLIENT_ID: '1003456046183-ongduka50iv20f0pobt7gr6a61e0l60a.apps.googleusercontent.com',
+    CLIENT_ID:    'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
     REDIRECT_URI: window.location.origin + window.location.pathname,
     SCOPES: [
       'https://www.googleapis.com/auth/fitness.sleep.read',
@@ -401,7 +401,6 @@ const GoogleFitModule = (() => {
     const settingsNavItem = document.querySelector('.nav-item[onclick*="settings"]');
     if (!settingsNavItem) return;
 
-    const section = settingsNavItem.previousElementSibling; // .nav-section
     const navItem = document.createElement('div');
     navItem.className = 'nav-item';
     navItem.id = 'gfit-nav-item';
@@ -417,8 +416,8 @@ const GoogleFitModule = (() => {
       </span>
       Google Fit
       <span id="gfit-nav-badge" style="display:none;margin-left:auto;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)"></span>`;
-    // Insert before the Settings section label
-    section.parentNode.insertBefore(navItem, section);
+    // Insert AFTER the Settings nav item (below it)
+    settingsNavItem.parentNode.insertBefore(navItem, settingsNavItem.nextSibling);
 
     // Also add a "Sync" button to the dashboard topbar
     const dashActions = document.querySelector('#page-dashboard .topbar-actions');
@@ -443,12 +442,63 @@ const GoogleFitModule = (() => {
     page.innerHTML = `
       <div class="topbar">
         <div class="topbar-breadcrumb">Sleep Sanctuary / <span>Google Fit</span></div>
-        <div class="topbar-actions">
+        <div class="topbar-actions" style="display:flex;gap:8px;align-items:center">
           <button class="btn btn-primary" data-gfit-sync onclick="GoogleFitModule.sync()">
             <span class="gfit-g-icon">G</span> Sync Google Fit
           </button>
+          <!-- Troubleshooting dropdown -->
+          <div style="position:relative" id="gfit-help-wrapper">
+            <button class="btn btn-ghost" style="font-size:13px;padding:7px 14px;display:flex;align-items:center;gap:6px"
+              onclick="(function(){var d=document.getElementById('gfit-help-dropdown');d.style.display=d.style.display==='block'?'none':'block';})()">
+              ⚠ Troubleshooting <span style="font-size:10px">▾</span>
+            </button>
+            <div id="gfit-help-dropdown" style="display:none;position:absolute;right:0;top:calc(100% + 6px);width:380px;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,0.5);z-index:999;overflow:hidden">
+              <div style="padding:16px 18px 10px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+                <div style="font-weight:700;font-size:14px;color:var(--text-pri)">⚠ Troubleshooting Guide</div>
+                <button onclick="document.getElementById('gfit-help-dropdown').style.display='none'" style="background:none;border:none;color:var(--text-dim);font-size:18px;cursor:pointer;padding:0;line-height:1">×</button>
+              </div>
+              <div style="max-height:420px;overflow-y:auto;padding:12px 0" id="gfit-help-list">
+                ${[
+                  ['🔴 redirect_uri_mismatch', 'Your redirect URI in Google Cloud Console does not match your site URL. Go to APIs & Services → Credentials → edit your OAuth Client ID. Under Authorized Redirect URIs add your exact URL both with and without a trailing slash, e.g. https://yoursite.com/app and https://yoursite.com/app/'],
+                  ['🔴 Google Auth Platform not configured', 'You need to complete the OAuth consent screen setup. Go to APIs & Services → OAuth consent screen, fill in your App name and email, click through all steps, and add your Google account as a test user under the Audience tab.'],
+                  ['🔴 Error 400: invalid_client', 'Your Client ID is incorrect or not saved properly. Open google-fit-module.js in VS Code, search for CLIENT_ID and make sure it matches exactly what is shown in Google Cloud Console under Credentials.'],
+                  ['🔴 Error 403: access_denied', 'Your Google account is not added as a test user. Go to APIs & Services → OAuth consent screen → Audience → Test users and add your email address, then try connecting again.'],
+                  ['🟡 Connected but no data after sync', 'Google Fit may not have any sleep data yet. Open the Google Fit app on your phone, tap + and manually log a sleep entry. Wait 5–10 minutes for Google to process it, then click Sync Now again.'],
+                  ['🟡 Sync button does nothing', 'Your token may have expired — tokens last 1 hour. Click Disconnect then Connect Google Fit again to get a fresh token, then sync.'],
+                  ['🟡 Data shows 0% deep sleep and REM', 'This is normal if you only have a phone and no wearable. iPhones and basic Android phones cannot detect sleep stages — they only log total duration. A Wear OS watch or Fitbit is needed for stage data.'],
+                  ['🟡 Sleep entry logged but wrong date shown', 'Google Fit buckets sleep by the date the session started. If you went to bed before midnight the entry will appear under the previous day. This is expected behaviour.'],
+                  ['🟢 Manual entries are being overwritten', 'They should never be overwritten — only entries with _source: google_fit get updated. If this is happening, check that your manual entries were saved before syncing. Manual entries always take priority.'],
+                  ['🟢 Site works locally but not on GitHub Pages', 'Make sure both your index.html and google-fit-module.js are uploaded to the same repository and that GitHub Pages is enabled under Settings → Pages. Also ensure your redirect URI in Google Cloud matches your github.io URL exactly.'],
+                  ['🟢 Token keeps expiring every hour', 'This is a Google limitation for the implicit OAuth flow used here. You will need to reconnect once per hour during active use. This is normal and no data is ever lost when reconnecting.'],
+                ].map(([title, desc]) => `
+                  <div style="padding:12px 18px;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer"
+                    onclick="(function(el){var b=el.nextElementSibling;b.style.display=b.style.display==='block'?'none':'block';})(this)">
+                    <div style="font-size:13px;font-weight:600;color:var(--text-pri);display:flex;justify-content:space-between;align-items:center;gap:8px">
+                      <span>${title}</span>
+                      <span style="font-size:10px;color:var(--text-dim);flex-shrink:0">▾</span>
+                    </div>
+                    <div style="display:none;font-size:12.5px;color:var(--text-dim);line-height:1.7;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.05)">
+                      ${desc}
+                    </div>
+                  </div>`).join('')}
+              </div>
+              <div style="padding:12px 18px;border-top:1px solid var(--border);font-size:11.5px;color:var(--text-dim);text-align:center">
+                Still stuck? Check the browser console (⌘ + Option + J) for error details.
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+      <script>
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+          var wrapper = document.getElementById('gfit-help-wrapper');
+          if (wrapper && !wrapper.contains(e.target)) {
+            var dd = document.getElementById('gfit-help-dropdown');
+            if (dd) dd.style.display = 'none';
+          }
+        });
+      </script>
 
       <div style="padding:28px">
         <div class="page-title">Google Fit</div>
