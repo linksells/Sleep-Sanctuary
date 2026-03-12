@@ -450,40 +450,48 @@ const GoogleFitModule = (() => {
           <div style="position:relative" id="gfit-help-wrapper">
             <button class="btn btn-ghost" style="font-size:13px;padding:7px 14px;display:flex;align-items:center;gap:6px"
               onclick="(function(){var d=document.getElementById('gfit-help-dropdown');d.style.display=d.style.display==='block'?'none':'block';})()">
-              ⚠ Troubleshooting <span style="font-size:10px">▾</span>
+              ❓ Need Help <span style="font-size:10px">▾</span>
             </button>
-            <div id="gfit-help-dropdown" style="display:none;position:absolute;right:0;top:calc(100% + 6px);width:380px;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,0.5);z-index:999;overflow:hidden">
-              <div style="padding:16px 18px 10px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
-                <div style="font-weight:700;font-size:14px;color:var(--text-pri)">⚠ Troubleshooting Guide</div>
-                <button onclick="document.getElementById('gfit-help-dropdown').style.display='none'" style="background:none;border:none;color:var(--text-dim);font-size:18px;cursor:pointer;padding:0;line-height:1">×</button>
+            <div id="gfit-help-dropdown" style="display:none;position:absolute;right:0;top:calc(100% + 6px);width:400px;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,0.5);z-index:999;overflow:hidden">
+              <div style="padding:16px 18px 12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+                <div style="font-weight:700;font-size:15px;color:var(--text-pri)">❓ Common Issues</div>
+                <button onclick="document.getElementById('gfit-help-dropdown').style.display='none'" style="background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer;padding:0;line-height:1">×</button>
               </div>
-              <div style="max-height:420px;overflow-y:auto;padding:12px 0" id="gfit-help-list">
+              <div style="max-height:460px;overflow-y:auto">
                 ${[
-                  ['🔴 redirect_uri_mismatch', 'Your redirect URI in Google Cloud Console does not match your site URL. Go to APIs & Services → Credentials → edit your OAuth Client ID. Under Authorized Redirect URIs add your exact URL both with and without a trailing slash, e.g. https://yoursite.com/app and https://yoursite.com/app/'],
-                  ['🔴 Google Auth Platform not configured', 'You need to complete the OAuth consent screen setup. Go to APIs & Services → OAuth consent screen, fill in your App name and email, click through all steps, and add your Google account as a test user under the Audience tab.'],
-                  ['🔴 Error 400: invalid_client', 'Your Client ID is incorrect or not saved properly. Open google-fit-module.js in VS Code, search for CLIENT_ID and make sure it matches exactly what is shown in Google Cloud Console under Credentials.'],
-                  ['🔴 Error 403: access_denied', 'Your Google account is not added as a test user. Go to APIs & Services → OAuth consent screen → Audience → Test users and add your email address, then try connecting again.'],
-                  ['🟡 Connected but no data after sync', 'Google Fit may not have any sleep data yet. Open the Google Fit app on your phone, tap + and manually log a sleep entry. Wait 5–10 minutes for Google to process it, then click Sync Now again.'],
-                  ['🟡 Sync button does nothing', 'Your token may have expired — tokens last 1 hour. Click Disconnect then Connect Google Fit again to get a fresh token, then sync.'],
-                  ['🟡 Data shows 0% deep sleep and REM', 'This is normal if you only have a phone and no wearable. iPhones and basic Android phones cannot detect sleep stages — they only log total duration. A Wear OS watch or Fitbit is needed for stage data.'],
-                  ['🟡 Sleep entry logged but wrong date shown', 'Google Fit buckets sleep by the date the session started. If you went to bed before midnight the entry will appear under the previous day. This is expected behaviour.'],
-                  ['🟢 Manual entries are being overwritten', 'They should never be overwritten — only entries with _source: google_fit get updated. If this is happening, check that your manual entries were saved before syncing. Manual entries always take priority.'],
-                  ['🟢 Site works locally but not on GitHub Pages', 'Make sure both your index.html and google-fit-module.js are uploaded to the same repository and that GitHub Pages is enabled under Settings → Pages. Also ensure your redirect URI in Google Cloud matches your github.io URL exactly.'],
-                  ['🟢 Token keeps expiring every hour', 'This is a Google limitation for the implicit OAuth flow used here. You will need to reconnect once per hour during active use. This is normal and no data is ever lost when reconnecting.'],
-                ].map(([title, desc]) => `
-                  <div style="padding:12px 18px;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer"
-                    onclick="(function(el){var b=el.nextElementSibling;b.style.display=b.style.display==='block'?'none':'block';})(this)">
-                    <div style="font-size:13px;font-weight:600;color:var(--text-pri);display:flex;justify-content:space-between;align-items:center;gap:8px">
-                      <span>${title}</span>
-                      <span style="font-size:10px;color:var(--text-dim);flex-shrink:0">▾</span>
+                  ['🔴','The Connect button is not working',
+                   'Try disconnecting and connecting again. If it still fails, your session may have timed out — refreshing the page and trying again usually fixes this.'],
+                  ['🔴','It says "Sign in" but then shows an error',
+                   'This usually means Google does not recognise the app yet. Try clearing your browser cookies and connecting again. If the problem continues, contact the app owner.'],
+                  ['🟡','I connected but I cannot see any sleep data',
+                   'Make sure you have sleep data logged in the Google Fit app on your phone first. Once you have at least one entry in Google Fit, come back here and click Sync Now. It can take up to 10 minutes for new entries to appear.'],
+                  ['🟡','I clicked Sync but nothing happened',
+                   'Your connection may have expired — Google sessions last about 1 hour. Click Disconnect, then Connect Google Fit again to refresh your connection, and then try syncing.'],
+                  ['🟡','My sleep times or dates look wrong',
+                   'Google Fit records sleep based on when you went to bed. If you went to bed before midnight, the entry will show under the previous day. The times shown are pulled directly from your Google Fit app — if they look wrong, check the entry in the Google Fit app and correct it there.'],
+                  ['🟡','Deep sleep and REM show as 0%',
+                   'This is completely normal if you are using just a phone. Phones can only track how long you slept, not your sleep stages. To see deep sleep and REM data you need a smartwatch like a Wear OS watch, Fitbit, or Garmin that is linked to your Google Fit account.'],
+                  ['🟢','I entered sleep manually — will syncing overwrite it?',
+                   'No — your manual entries are always kept safe. Syncing from Google Fit will never overwrite anything you have entered yourself. Only data that came from Google Fit gets updated when you sync.'],
+                  ['🟢','I need to sign back in every hour',
+                   'This is normal. Google limits app connections to 1 hour for security. Simply click Disconnect and Connect Google Fit again — all your data stays saved and nothing is lost.'],
+                ].map(([dot, title, desc]) => `
+                  <div style="border-bottom:1px solid rgba(255,255,255,0.05)">
+                    <div style="padding:14px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px"
+                      onclick="(function(el){var b=el.parentElement.querySelector('.gfit-help-body');var arrow=el.querySelector('.gfit-arrow');var open=b.style.display==='block';b.style.display=open?'none':'block';arrow.textContent=open?'&#9662;':'&#9652;';})(this)">
+                      <div style="display:flex;align-items:center;gap:10px">
+                        <span style="font-size:16px;flex-shrink:0">${dot}</span>
+                        <span style="font-size:13.5px;font-weight:600;color:var(--text-pri);line-height:1.4">${title}</span>
+                      </div>
+                      <span class="gfit-arrow" style="font-size:11px;color:var(--text-dim);flex-shrink:0">&#9662;</span>
                     </div>
-                    <div style="display:none;font-size:12.5px;color:var(--text-dim);line-height:1.7;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.05)">
+                    <div class="gfit-help-body" style="display:none;padding:0 18px 14px 44px;font-size:13px;color:var(--text-sec);line-height:1.75">
                       ${desc}
                     </div>
                   </div>`).join('')}
               </div>
-              <div style="padding:12px 18px;border-top:1px solid var(--border);font-size:11.5px;color:var(--text-dim);text-align:center">
-                Still stuck? Check the browser console (⌘ + Option + J) for error details.
+              <div style="padding:14px 18px;border-top:1px solid var(--border);font-size:12px;color:var(--text-dim);text-align:center;line-height:1.6">
+                Still having trouble? Try disconnecting and reconnecting first — this fixes most issues.
               </div>
             </div>
           </div>
@@ -570,46 +578,6 @@ const GoogleFitModule = (() => {
                   <tr><td colspan="8" style="text-align:center;color:var(--text-dim);padding:32px">Connect and sync to see your data here</td></tr>
                 </tbody>
               </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- Setup Guide (always visible) -->
-        <div class="card" id="gfit-setup-card" style="margin-top:20px">
-          <div class="card-title">Setup Guide</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
-            <!-- Steps column -->
-            <div>
-              ${[
-                ['1','Create Google Cloud Project','Go to console.cloud.google.com → New Project. Name it after your app.'],
-                ['2','Enable Fitness API','APIs &amp; Services → Library → search "Fitness API" → Enable.'],
-                ['3','Create OAuth Credentials','Credentials → Create → OAuth 2.0 Client ID → Web application. Add your domain as an Authorized JavaScript Origin.'],
-                ['4','Add your Client ID','Open this module file and replace <code style="color:var(--accent2)">YOUR_GOOGLE_CLIENT_ID</code> in CFG.CLIENT_ID at the top.'],
-                ['5','OAuth Consent Screen','Add the 4 fitness scopes and add test users while in development mode.'],
-              ].map(([n,t,d]) => `
-                <div style="display:flex;gap:14px;margin-bottom:18px">
-                  <div style="width:28px;height:28px;border-radius:50%;background:rgba(138,110,240,0.15);border:1px solid rgba(138,110,240,0.3);color:var(--accent3);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">${n}</div>
-                  <div>
-                    <div style="font-weight:700;font-size:14px;margin-bottom:4px">${t}</div>
-                    <div style="font-size:13px;color:var(--text-dim);line-height:1.65">${d}</div>
-                  </div>
-                </div>`).join('')}
-            </div>
-            <!-- Scopes + important notes column -->
-            <div>
-              <div style="font-weight:700;font-size:13px;color:var(--accent3);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.06em">Required OAuth Scopes</div>
-              <div style="background:var(--bg-deep);border:1px solid var(--border);border-radius:10px;padding:14px;font-family:'DM Mono',monospace;font-size:11.5px;color:var(--accent2);line-height:2;margin-bottom:16px">
-                fitness.sleep.read<br>
-                fitness.activity.read<br>
-                fitness.heart_rate.read<br>
-                fitness.body.read
-              </div>
-              <div style="background:rgba(255,210,100,0.07);border:1px solid rgba(255,210,100,0.2);border-radius:10px;padding:14px;font-size:13px;color:#f5cc6a;line-height:1.7">
-                <strong>⚡ Important:</strong> Tokens expire in 1 hour. This module automatically checks expiry before every API call. If expired, it will prompt you to reconnect — no data is lost.
-              </div>
-              <div style="margin-top:12px;background:rgba(80,210,150,0.06);border:1px solid rgba(80,210,150,0.15);border-radius:10px;padding:14px;font-size:13px;color:var(--accent2);line-height:1.7">
-                <strong>✓ Future-proof design:</strong> Google Fit data is merged non-destructively. Manual entries always take priority. Upgrading your Sleep Sanctuary version will never lose synced data.
-              </div>
             </div>
           </div>
         </div>
