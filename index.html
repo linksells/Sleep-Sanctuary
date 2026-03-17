@@ -505,6 +505,62 @@
   </div>
 </div>
 
+<!-- Dream Journal Modal -->
+<div class="modal-overlay" id="dreamModal">
+  <div class="modal" style="width:580px">
+    <div class="modal-title">✦ New Dream Entry</div>
+    <div class="modal-sub">Record your dream, routine, and reflection for the night</div>
+
+    <!-- Date -->
+    <div class="form-group">
+      <label class="form-label">Date</label>
+      <input class="form-input" type="date" id="dreamDate">
+    </div>
+
+    <!-- Dream description -->
+    <div class="form-group">
+      <label class="form-label" style="font-size:14px;font-weight:700;color:var(--accent3)">🌙 What did you dream about?</label>
+      <textarea class="form-textarea" id="dreamText" rows="5" placeholder="Write down everything you remember from your dream — people, places, feelings, anything that stood out..." style="min-height:120px;line-height:1.7;font-family:'Lora',serif"></textarea>
+    </div>
+
+    <div style="height:1px;background:var(--border);margin:8px 0 20px"></div>
+
+    <!-- Pre-sleep routine -->
+    <div class="form-group">
+      <label class="form-label" style="font-size:14px;font-weight:700;color:var(--accent2)">🌿 Pre-Sleep Routine</label>
+      <textarea class="form-textarea" id="dreamRoutine" rows="3" placeholder="What did you do before bed? e.g. read for 20 minutes, no screens after 10pm, herbal tea..." style="min-height:80px;line-height:1.7"></textarea>
+    </div>
+
+    <!-- Morning reflection -->
+    <div class="form-group">
+      <label class="form-label" style="font-size:14px;font-weight:700;color:var(--gold)">☀️ Morning Reflection</label>
+      <textarea class="form-textarea" id="dreamReflection" rows="3" placeholder="How do you feel this morning? Any thoughts on last night's sleep or dream?" style="min-height:80px;line-height:1.7"></textarea>
+    </div>
+
+    <div style="height:1px;background:var(--border);margin:8px 0 20px"></div>
+
+    <!-- Sleep quality score -->
+    <div class="form-group">
+      <label class="form-label" style="font-size:14px;font-weight:700;color:var(--text-pri)">Sleep Quality</label>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+        <div style="display:flex;gap:6px" id="dreamStarRow">
+          <button class="star-btn" data-dream-star="1" onclick="setDreamStar(1)" style="font-size:26px;background:none;border:none;cursor:pointer;color:var(--text-dim);padding:0;transition:color 0.15s">★</button>
+          <button class="star-btn" data-dream-star="2" onclick="setDreamStar(2)" style="font-size:26px;background:none;border:none;cursor:pointer;color:var(--text-dim);padding:0;transition:color 0.15s">★</button>
+          <button class="star-btn" data-dream-star="3" onclick="setDreamStar(3)" style="font-size:26px;background:none;border:none;cursor:pointer;color:var(--text-dim);padding:0;transition:color 0.15s">★</button>
+          <button class="star-btn" data-dream-star="4" onclick="setDreamStar(4)" style="font-size:26px;background:none;border:none;cursor:pointer;color:var(--text-dim);padding:0;transition:color 0.15s">★</button>
+          <button class="star-btn" data-dream-star="5" onclick="setDreamStar(5)" style="font-size:26px;background:none;border:none;cursor:pointer;color:var(--text-dim);padding:0;transition:color 0.15s">★</button>
+        </div>
+        <span id="dreamStarLabel" style="font-size:13px;color:var(--text-dim)">Select a rating  0 / 5</span>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-ghost" onclick="closeDreamModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveDreamEntry()">Save Dream Entry</button>
+    </div>
+  </div>
+</div>
+
 <div id="app">
   <!-- Sidebar -->
   <nav id="sidebar">
@@ -518,7 +574,7 @@
     <div class="nav-section">Tracking</div>
     <div class="nav-item" onclick="nav('moon')"><span class="nav-icon">◑</span> Moon Phase</div>
     <div class="nav-item" onclick="nav('goals')"><span class="nav-icon">◎</span> Sleep Goals</div>
-    <div class="nav-item" onclick="nav('journal')"><span class="nav-icon">◧</span> Journal</div>
+    <div class="nav-item" onclick="nav('journal')"><span class="nav-icon">◧</span> Dream Journal</div>
     <div class="nav-section">Settings</div>
     <div class="nav-item" onclick="nav('settings')"><span class="nav-icon">⊙</span> Settings</div>
   </nav>
@@ -884,12 +940,12 @@
     <!-- ══ JOURNAL ══ -->
     <div class="page" id="page-journal">
       <div class="topbar">
-        <div class="topbar-breadcrumb">Sleep Sanctuary / <span>Journal</span></div>
-        <div class="topbar-actions"><button class="btn btn-primary" onclick="openModal()">+ New Entry</button></div>
+        <div class="topbar-breadcrumb">Sleep Sanctuary / <span>Dream Journal</span></div>
+        <div class="topbar-actions"><button class="btn btn-primary" onclick="openDreamModal()">✦ New Dream Entry</button></div>
       </div>
       <div style="padding:28px">
         <div class="page-title">Dream Journal</div>
-        <div class="page-sub">Detailed nightly records and reflections</div>
+        <div class="page-sub">Capture your dreams, reflections, and nightly rituals</div>
         <div id="journalEntries"></div>
       </div>
     </div>
@@ -2111,7 +2167,48 @@ function renderGoals() {
 // JOURNAL
 // ─────────────────────────────────────────────────────────────────────────────
 function renderJournal() {
-  document.getElementById('journalEntries').innerHTML=sleepData.map(r=>`<div class="journal-card"><div class="journal-date">${r.date}, 2026</div><div class="journal-meta">Bedtime ${r.bedtime}  ·  Wake ${r.wake}  ·  ${r.dur}</div><div class="journal-props"><div><div class="journal-prop-label">Quality</div><div class="journal-prop-value" style="color:var(--gold)">${'★'.repeat(r.quality)}</div></div><div><div class="journal-prop-label">Deep Sleep</div><div class="journal-prop-value" style="color:var(--accent1)">${r.deep}%</div></div><div><div class="journal-prop-label">REM</div><div class="journal-prop-value" style="color:var(--accent2)">${r.rem}%</div></div></div><div class="journal-section"><h3>Pre-Sleep Routine</h3><p>${r.routine}</p></div><div class="journal-section"><h3>Sleep Notes</h3><p>${r.notes}</p></div><div class="journal-section"><h3>Morning Reflection</h3><p>${r.reflection}</p></div><div style="margin-top:12px">${tagHtml(r.tags)}</div></div>`).join('');
+  // Merge sleepData entries with any dream entries saved in calendarData
+  const dreamEntries = window.dreamJournalEntries || [];
+
+  // Build combined list — dream entries first, then sleepData as fallback if they have notes
+  const allEntries = [
+    ...dreamEntries,
+    ...sleepData.filter(r => r.notes || r.routine || r.reflection).map(r => ({
+      date: r.date + ', 2026',
+      dream: r.notes || '',
+      routine: r.routine || '',
+      reflection: r.reflection || '',
+      quality: r.quality || 0,
+      _source: 'sleep'
+    }))
+  ];
+
+  if (!allEntries.length) {
+    document.getElementById('journalEntries').innerHTML = `
+      <div style="text-align:center;padding:60px 20px;color:var(--text-dim)">
+        <div style="font-size:48px;margin-bottom:16px">🌙</div>
+        <div style="font-size:18px;font-weight:600;color:var(--text-sec);margin-bottom:8px">No dream entries yet</div>
+        <div style="font-size:14px">Click <strong>✦ New Dream Entry</strong> above to record your first dream</div>
+      </div>`;
+    return;
+  }
+
+  const starLabels = ['','Poor','Fair','Good','Great','Perfect'];
+  document.getElementById('journalEntries').innerHTML = allEntries.map(r => `
+    <div class="journal-card">
+      <div class="journal-date">${r.date}</div>
+
+      <!-- Quality score only — no other sleep data -->
+      ${r.quality ? `
+      <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;padding:6px 14px;background:rgba(255,200,60,0.08);border:1px solid rgba(255,200,60,0.2);border-radius:20px">
+        <span style="color:var(--gold);font-size:16px">${'★'.repeat(r.quality)}<span style="color:var(--text-dim)">${'★'.repeat(5-r.quality)}</span></span>
+        <span style="font-size:12px;color:var(--gold);font-weight:600">${starLabels[r.quality]}</span>
+      </div>` : ''}
+
+      ${r.dream ? `<div class="journal-section"><h3>🌙 Dream</h3><p>${r.dream}</p></div>` : ''}
+      ${r.routine ? `<div class="journal-section"><h3>🌿 Pre-Sleep Routine</h3><p>${r.routine}</p></div>` : ''}
+      ${r.reflection ? `<div class="journal-section"><h3>☀️ Morning Reflection</h3><p>${r.reflection}</p></div>` : ''}
+    </div>`).join('');
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2129,6 +2226,58 @@ function openModal() {
 }
 function closeModal() { document.getElementById('entryModal').classList.remove('open'); }
 function saveEntry() { closeModal(); toast('Entry saved successfully!'); }
+
+// ─── DREAM JOURNAL ──────────────────────────────────────────────────────────
+window.dreamJournalEntries = window.dreamJournalEntries || [];
+
+function openDreamModal() {
+  document.getElementById('dreamModal').classList.add('open');
+  document.getElementById('dreamDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('dreamText').value = '';
+  document.getElementById('dreamRoutine').value = '';
+  document.getElementById('dreamReflection').value = '';
+  document.querySelectorAll('[data-dream-star]').forEach(b => b.style.color = 'var(--text-dim)');
+  document.getElementById('dreamStarLabel').textContent = 'Select a rating  0 / 5';
+  window._dreamStarValue = 0;
+}
+
+function closeDreamModal() { document.getElementById('dreamModal').classList.remove('open'); }
+
+function setDreamStar(v) {
+  window._dreamStarValue = v;
+  const labels = ['','Poor','Fair','Good','Great','Perfect'];
+  document.querySelectorAll('[data-dream-star]').forEach(b => {
+    b.style.color = parseInt(b.dataset.dreamStar) <= v ? 'var(--gold)' : 'var(--text-dim)';
+  });
+  document.getElementById('dreamStarLabel').textContent = labels[v] + '  ' + v + ' / 5';
+}
+
+function saveDreamEntry() {
+  const dateVal = document.getElementById('dreamDate').value;
+  const dream = document.getElementById('dreamText').value.trim();
+  const routine = document.getElementById('dreamRoutine').value.trim();
+  const reflection = document.getElementById('dreamReflection').value.trim();
+  const quality = window._dreamStarValue || 0;
+
+  if (!dream && !routine && !reflection) {
+    toast('Please fill in at least one field before saving.');
+    return;
+  }
+
+  // Format date nicely
+  const d = new Date(dateVal + 'T12:00:00');
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const dateStr = monthNames[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+
+  window.dreamJournalEntries.unshift({ date: dateStr, dream, routine, reflection, quality });
+  closeDreamModal();
+  renderJournal();
+  toast('Dream entry saved ✓');
+}
+
+document.getElementById('dreamModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDreamModal();
+});
 document.querySelectorAll('.star-btn').forEach(btn => btn.addEventListener('click', function() {
   const v = parseInt(this.dataset.v);
   document.querySelectorAll('.star-btn').forEach((b,i) => b.classList.toggle('active', i < v));
